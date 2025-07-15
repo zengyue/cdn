@@ -1,0 +1,19 @@
+{
+  "name": "suoqiu-cdn",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "main": "lib/index.js",
+  "homepage": "https://monet.vision/",
+  "author": "https://monet.vision/",
+  "repository": {
+    "type": "git",
+    "url": "https://monet.vision/"
+  },
+  "bugs": {
+    "url": "https://monet.vision/"
+  },
+  "files": [
+    "monet"
+  ]
+}
