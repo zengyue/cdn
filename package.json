@@ -4,6 +4,10 @@
   "description": "",
   "keywords": [],
   "main": "lib/index.js",
+  "scripts": {
+    "png": "tsx scripts/png2webp.ts",
+    "release": "./release.sh patch \"update\""
+  },
   "homepage": "https://monet.vision/",
   "author": "https://monet.vision/",
   "repository": {
@@ -15,5 +19,11 @@
   },
   "files": [
     "monet"
-  ]
+  ],
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "sharp": "^0.34.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
 }
