@@ -6,6 +6,7 @@
   "main": "lib/index.js",
   "scripts": {
     "png": "tsx scripts/png2webp.ts",
+    "poster": "tsx scripts/extract-poster.ts",
     "release": "./release.sh patch \"update\""
   },
   "homepage": "https://monet.vision/",
