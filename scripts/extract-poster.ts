@@ -80,14 +80,44 @@ async function extractPoster(
   }
 }
 
-// 自动扫描 monet 目录下的所有视频文件
-async function main() {
+// 提取视频最后一帧为 WebP 格式
+async function extractLastFrame(
+  videoPath: string,
+  outputPath: string,
+  quality: number = 75
+): Promise<void> {
+  try {
+    // 使用更简单可靠的方法：直接从视频末尾提取最后一帧
+    // -sseof -0.04: 从视频结尾前0.04秒开始（约1帧的时间）
+    // -i: 输入文件
+    // -vframes 1: 只提取一帧
+    // -c:v libwebp: 使用 WebP 编码器
+    // -quality: WebP 质量 (0-100, 数字越大质量越高)
+    // -y: 覆盖输出文件
+    const extractCommand = `ffmpeg -sseof -0.04 -i "${videoPath}" -vframes 1 -c:v libwebp -quality ${quality} -y "${outputPath}"`;
+    await execAsync(extractCommand);
+
+    console.log(`✅ 成功提取最后一帧: ${videoPath} -> ${outputPath}`);
+  } catch (error) {
+    console.error(`❌ 提取最后一帧失败: ${videoPath}`, error);
+    throw error;
+  }
+} // 通用的视频帧提取函数
+async function extractFrames(
+  useLastFrame: boolean = false,
+  onlyMissingPosters: boolean = false
+) {
   // 检查 FFmpeg 是否可用
   if (!(await checkFFmpeg())) {
     process.exit(1);
   }
 
-  console.log('🔍 正在扫描 monet 目录下的所有视频文件...');
+  const frameType = useLastFrame ? '最后一帧' : '首帧';
+  const actionDesc = onlyMissingPosters
+    ? `为未生成 poster.webp 的视频提取${frameType}作为 poster`
+    : `提取视频${frameType}`;
+
+  console.log(`🔍 正在扫描 monet 目录下的所有视频文件（${actionDesc}）...`);
 
   // 递归扫描 monet 目录下的所有视频文件
   const allVideoFiles = await getVideoFilesFromDirectory('monet', true);
@@ -97,9 +127,14 @@ async function main() {
     return;
   }
 
-  console.log(`📹 找到 ${allVideoFiles.length} 个视频文件需要处理`);
+  const checkDesc = onlyMissingPosters
+    ? '个视频文件需要检查'
+    : '个视频文件需要处理';
+  console.log(`📹 找到 ${allVideoFiles.length} ${checkDesc}`);
 
   const defaultQuality = 75; // 统一使用 75 质量
+  let processedCount = 0;
+  let skippedCount = 0;
 
   for (const videoFile of allVideoFiles) {
     try {
@@ -112,7 +147,11 @@ async function main() {
       // 检查输出文件是否已存在
       try {
         await fs.access(outputPath);
-        console.log(`⏭️  跳过已存在的文件: ${outputPath}`);
+        const skipMsg = onlyMissingPosters
+          ? `⏭️  跳过已有 poster 的视频: ${path.basename(inputPath)}`
+          : `⏭️  跳过已存在的文件: ${outputPath}`;
+        console.log(skipMsg);
+        skippedCount++;
         continue;
       } catch (error) {
         // 文件不存在，继续处理
@@ -126,18 +165,42 @@ async function main() {
         continue;
       }
 
-      // 提取首帧
-      await extractPoster(inputPath, outputPath, defaultQuality);
+      // 提取帧
+      if (useLastFrame) {
+        await extractLastFrame(inputPath, outputPath, defaultQuality);
+      } else {
+        await extractPoster(inputPath, outputPath, defaultQuality);
+      }
 
       // 获取文件大小信息
       const outputStats = await fs.stat(outputPath);
-      console.log(`   首帧大小: ${(outputStats.size / 1024).toFixed(1)}KB`);
+      const sizeDesc = onlyMissingPosters ? 'poster' : frameType;
+      console.log(
+        `   ${sizeDesc}大小: ${(outputStats.size / 1024).toFixed(1)}KB`
+      );
+      processedCount++;
     } catch (error) {
       console.error(`❌ 处理失败: ${videoFile}`, error);
     }
   }
 
-  console.log('🎉 视频首帧提取完成！');
+  const completionMsg = onlyMissingPosters
+    ? `🎉 视频${frameType} poster 提取完成！处理了 ${processedCount} 个文件，跳过了 ${skippedCount} 个文件`
+    : `🎉 视频${frameType}提取完成！${
+        processedCount > 0 ? `处理了 ${processedCount} 个文件，` : ''
+      }${skippedCount > 0 ? `跳过了 ${skippedCount} 个文件` : ''}`;
+
+  console.log(completionMsg);
+}
+
+// 自动扫描 monet 目录下的所有视频文件并提取最后一帧作为 poster（只处理未生成 poster.webp 的视频）
+async function extractLastFrames() {
+  await extractFrames(true, true);
+}
+
+// 自动扫描 monet 目录下的所有视频文件
+async function main() {
+  await extractFrames(false, false);
 }
 
 // 如果直接运行此脚本
@@ -145,7 +208,21 @@ const isMainModule =
   process.argv[1] === import.meta.url ||
   process.argv[1]?.endsWith('extract-poster.ts');
 if (isMainModule) {
-  main().catch(console.error);
+  // 检查命令行参数，判断是提取首帧还是最后一帧
+  const args = process.argv.slice(2);
+  const extractLast = args.includes('--last') || args.includes('-l');
+
+  if (extractLast) {
+    extractLastFrames().catch(console.error);
+  } else {
+    main().catch(console.error);
+  }
 }
 
-export { extractPoster, getVideoFilesFromDirectory, isSupportedVideoFile };
+export {
+  extractPoster,
+  extractLastFrame,
+  extractFrames,
+  getVideoFilesFromDirectory,
+  isSupportedVideoFile,
+};

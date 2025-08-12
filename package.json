@@ -7,6 +7,7 @@
   "scripts": {
     "png": "tsx scripts/png2webp.ts",
     "poster": "tsx scripts/extract-poster.ts",
+    "last-frame": "tsx scripts/extract-poster.ts --last",
     "release": "./release.sh patch \"update\""
   },
   "homepage": "https://monet.vision/",
