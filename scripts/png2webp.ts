@@ -142,8 +142,8 @@ const convertFiles = [
   },
   {
     image: 'monet/pages/lip-sync',
-    width: 1000,
-    height: 1000,
+    width: 1024,
+    height: 1024,
   },
   {
     image: 'monet/pages/open-eyes',
