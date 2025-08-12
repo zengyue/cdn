@@ -131,6 +131,11 @@ const convertFiles = [
     height: 900,
   },
   {
+    image: 'monet/pages/video-generator/*',
+    width: 1024,
+    height: 1024,
+  },
+  {
     image: 'monet/pages/video-effects/*',
     width: 600,
     height: 600,
