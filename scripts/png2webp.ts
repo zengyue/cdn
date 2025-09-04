@@ -137,8 +137,8 @@ const convertFiles = [
   },
   {
     image: 'monet/pages/video-effects/*',
-    width: 600,
-    height: 600,
+    width: 1024,
+    height: 1024,
   },
   {
     image: 'monet/pages/lip-sync',
