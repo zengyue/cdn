@@ -91,9 +91,9 @@ const convertFiles = [
     height: 400,
   },
   {
-    image: 'monet/pages/photo-effects/effects/',
-    width: 400,
-    height: 400,
+    image: 'monet/pages/photo-effects/effects/*',
+    width: 800,
+    height: 800,
   },
   {
     image: 'monet/pages/photo-effects/effects/ghibli',
