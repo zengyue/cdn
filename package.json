@@ -1,6 +1,6 @@
 {
   "name": "suoqiu-cdn",
-  "version": "1.0.35",
+  "version": "1.0.36",
   "description": "",
   "keywords": [],
   "main": "lib/index.js",
